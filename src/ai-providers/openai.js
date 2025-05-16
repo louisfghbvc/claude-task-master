@@ -5,12 +5,12 @@ import { log } from '../../scripts/modules/utils.js';
 /**
  * Generates text using OpenAI models via Vercel AI SDK.
  *
- * @param {object} params - Parameters including apiKey, modelId, messages, maxTokens, temperature.
+ * @param {object} params - Parameters including apiKey, modelId, messages, maxTokens, temperature, baseURL.
  * @returns {Promise<string>} The generated text content.
  * @throws {Error} If API call fails.
  */
 export async function generateOpenAIText(params) {
-	const { apiKey, modelId, messages, maxTokens, temperature } = params;
+	const { apiKey, modelId, messages, maxTokens, temperature, baseURL } = params;
 	log('debug', `generateOpenAIText called with model: ${modelId}`);
 
 	if (!apiKey) {
@@ -23,7 +23,8 @@ export async function generateOpenAIText(params) {
 		throw new Error('Invalid or empty messages array provided for OpenAI.');
 	}
 
-	const openaiClient = createOpenAI({ apiKey });
+	// Support custom baseURL for OpenAI-compatible endpoints (e.g. NVIDIA)
+	const openaiClient = createOpenAI({ apiKey, baseURL: baseURL || 'https://integrate.api.nvidia.com/v1' });
 
 	try {
 		const result = await openaiClient.chat(messages, {
@@ -32,6 +33,7 @@ export async function generateOpenAIText(params) {
 			max_tokens: maxTokens,
 			temperature
 		});
+		console.log('NVIDIA 回傳內容:', result);
 
 		// Adjust based on actual Vercel SDK response structure for openaiClient.chat
 		// This might need refinement based on testing the SDK's output.
